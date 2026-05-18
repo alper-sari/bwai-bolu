@@ -5,7 +5,7 @@ Provides tools to create VMs and install software via SSH.
 
 import os
 import subprocess
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 mcp = FastMCP("gcp-compute-tools")
 
