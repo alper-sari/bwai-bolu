@@ -20,8 +20,6 @@ You ──▶ ADK Agent (Gemini) ──▶ MCP Server (Cloud Run) ──▶ gclo
 - **MCP Server**: A lightweight Cloud Run service that exposes `create_vm`, `get_vm_status`, and `delete_vm` as tools.
 - **ADK Agent**: A Gemini-powered agent that understands your intent and calls the right tools.
 
-The two services are deployed independently. This means the instructor can deploy the MCP server once and all participants connect their own agents to it.
-
 <walkthrough-tutorial-difficulty difficulty="2"></walkthrough-tutorial-difficulty>
 
 Estimated time:
@@ -70,32 +68,20 @@ gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
 
 This is the service account both Cloud Run services will run as.
 
-## Deploy the MCP Server
+## Deploy Everything
 
-> **Workshop note:** If the instructor has already deployed a shared MCP server and given you a URL, skip this step and use that URL in the next section.
-
-Deploy the MCP server to Cloud Run. This service wraps `gcloud compute` commands and exposes them as MCP tools over SSE:
+A single script builds and deploys both the MCP server and the ADK agent:
 
 ```bash
-bash deploy/mcp_server.sh "${PROJECT_ID}"
+bash deploy/cloud_run.sh "${PROJECT_ID}" "${GOOGLE_API_KEY}"
 ```
 
 The script will:
-1. Build the container image from `mcp_server/`
-2. Deploy it to Cloud Run in `europe-west1`
-3. Print the service URL when done
+1. Build and deploy the MCP server to Cloud Run
+2. Build and deploy the ADK agent, automatically wiring in the MCP server URL
+3. Print both service URLs when done
 
-Copy the URL from the output — it looks like:
-
-```
-✅ MCP server hazır: https://gcp-mcp-server-XXXXXXXXXX-ew.a.run.app
-```
-
-Store it:
-
-```bash
-export MCP_SERVER_URL="https://gcp-mcp-server-XXXXXXXXXX-ew.a.run.app"
-```
+Open the **Agent URL** from the output in your browser — you should see the **ADK Web UI**.
 
 ### What's inside the MCP server?
 
@@ -108,21 +94,6 @@ The server (`mcp_server/server.py`) uses [FastMCP](https://github.com/jlowin/fas
 | `delete_vm` | Deletes the VM |
 
 When deployed, it runs with `MCP_TRANSPORT=sse` and serves requests at `/sse`.
-
-## Deploy the ADK Agent
-
-Now deploy your personal ADK agent and connect it to the MCP server:
-
-```bash
-bash deploy/cloud_run.sh "${PROJECT_ID}" "${MCP_SERVER_URL}" "${GOOGLE_API_KEY}"
-```
-
-The script will:
-1. Build the container image from the repo root
-2. Deploy it to Cloud Run with `MCP_SERVER_URL` and `GOOGLE_API_KEY` set as environment variables
-3. Print the agent URL when done
-
-Open the printed URL in your browser — you should see the **ADK Web UI**.
 
 ### How the connection works
 
