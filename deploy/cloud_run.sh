@@ -19,9 +19,8 @@ SA=$(gcloud iam service-accounts list \
     --format="value(email)")
 
 echo "▶ Building MCP server image..."
-gcloud builds submit \
+gcloud builds submit mcp_server/ \
   --tag "${MCP_IMAGE}" \
-  --dockerfile mcp_server/Dockerfile \
   --project "${PROJECT_ID}"
 
 echo "▶ Deploying MCP server to Cloud Run..."
